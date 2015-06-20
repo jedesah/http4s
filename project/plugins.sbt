@@ -1,3 +1,8 @@
+resolvers += Resolver.url(
+  "tpolecat-sbt-plugin-releases",
+    url("http://dl.bintray.com/content/tpolecat/sbt-plugin-releases"))(
+        Resolver.ivyStylePatterns)
+
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.7")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.2")
@@ -23,3 +28,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.0.4")
 addSbtPlugin("pl.project13.scala" % "sbt-jmh" % "0.1.12")
 
 addSbtPlugin("io.gatling" % "gatling-sbt" % "2.1.0")
+
+addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.3.2")

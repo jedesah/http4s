@@ -50,6 +50,8 @@ lazy val `examples-tomcat` = Project("examples-tomcat", file("examples/tomcat"))
 
 lazy val `examples-war` = Project("examples-war", file("examples/war")).dependsOn(examples, servlet)
 
+lazy val doc = project.dependsOn("blaze-server", "blaze-client", "dsl")
+
 organization in ThisBuild := "org.http4s"
 
 name := "http4s"
