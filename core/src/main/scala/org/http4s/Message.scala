@@ -127,7 +127,7 @@ object Message {
   */
 case class Request(
   method: Method = Method.GET,
-  uri: Uri = Uri(path = "/"),
+  uri: Uri = Uri(path = Root),
   httpVersion: HttpVersion = HttpVersion.`HTTP/1.1`,
   headers: Headers = Headers.empty,
   body: EntityBody = EmptyBody,
@@ -145,10 +145,11 @@ case class Request(
 
   lazy val (scriptName, pathInfo) = {
     val caret = attributes.get(Request.Keys.PathInfoCaret).getOrElse(0)
-    uri.path.splitAt(caret)
+    uri.path.asUrlEncodedString.splitAt(caret)
   }
 
-  def withPathInfo(pi: String) = copy(uri = uri.withPath(scriptName + pi))
+  // What is scriptName?
+  def withPathInfo(pi: String) = ??? //copy(uri = uri.withPath(scriptName + pi))
 
   lazy val pathTranslated: Option[File] = attributes.get(Keys.PathTranslated)
 

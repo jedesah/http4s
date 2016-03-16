@@ -26,16 +26,15 @@ import org.http4s.util.option.ToOptionOps
 case class Uri(
   scheme: Option[CaseInsensitiveString] = None,
   authority: Option[Authority] = None,
-  path: Path = "",
+  path: Path = Root,
   query: Query = Query.empty,
   fragment: Option[Fragment] = None)
   extends QueryOps with Renderable
 {
   def withPath(path: Path): Uri = copy(path = path)
 
-  def /(newFragment: Path): Uri = {
-    val newPath = if (path.isEmpty || path.last != '/') path + "/" + newFragment else path + newFragment
-    copy(path = newPath)
+  def /(newFragment: String): Uri = {
+    copy(path = path / newFragment)
   }
 
   def host: Option[Host] = authority.map(_.host)
@@ -79,7 +78,7 @@ case class Uri(
     super.renderString
 
   override def render(writer: Writer): writer.type = this match {
-    case Uri(Some(s), Some(a), "/", q, None) if q.isEmpty =>
+    case Uri(Some(s), Some(a), Root, q, None) if q.isEmpty =>
       renderSchemeAndAuthority(writer, s, a)
 
     case Uri(Some(s), Some(a), path, params, fragment) =>
@@ -138,7 +137,6 @@ object Uri extends UriFunctions {
 
   type UserInfo = String
 
-  type Path = String
   type Fragment = String
 
   case class Authority(
@@ -206,13 +204,16 @@ trait UriFunctions {
 
     /** Merge paths per RFC 3986 5.2.3 */
     def merge(base: Path, reference: Path): Path =
-      base.substring(0, base.lastIndexOf('/')+1) + reference
+      base match {
+        case Root => reference
+        case /(parent, child) => Path.apply(parent.toList ++ reference.toList)
+      }
 
     val target = (base,reference) match {
       case (_,               Uri(Some(_),_,_,_,_))      => reference
       case (Uri(s,_,_,_,_),  Uri(_,a@Some(_),p,q,f))    => Uri(s,a,p,q,f)
-      case (Uri(s,a,p,q,_),  Uri(_,_,"",Query.empty,f)) => Uri(s,a,p,q,f)
-      case (Uri(s,a,p,_,_),  Uri(_,_,"",q,f))           => Uri(s,a,p,q,f)
+      case (Uri(s,a,p,q,_),  Uri(_,_,Root,Query.empty,f)) => Uri(s,a,p,q,f)
+      case (Uri(s,a,p,_,_),  Uri(_,_,Root,q,f))           => Uri(s,a,p,q,f)
       case (Uri(s,a,bp,_,_), Uri(_,_,p,q,f)) =>
         if (p.headOption.contains('/')) Uri(s,a,p,q,f)
         else Uri(s,a,merge(bp,p),q,f)
